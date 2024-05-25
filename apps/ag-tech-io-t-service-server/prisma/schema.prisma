@@ -1,0 +1,61 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Device {
+  createdAt    DateTime @default(now())
+  farms        Farm[]
+  id           String   @id @default(cuid())
+  model        String?
+  name         String?
+  sensor       Sensor?  @relation(name: "DevicesOnSensor", fields: [sensorId], references: [id])
+  sensorId     String?
+  sensors      Sensor[] @relation(name: "DeviceOnSensors")
+  serialNumber String?
+  updatedAt    DateTime @updatedAt
+}
+
+model Sensor {
+  createdAt  DateTime             @default(now())
+  dataPoints DataPoint[]
+  device     Device?              @relation(name: "DeviceOnSensors", fields: [deviceId], references: [id])
+  deviceId   String?
+  devices    Device[]             @relation(name: "DevicesOnSensor")
+  farm       Farm?                @relation(fields: [farmId], references: [id])
+  farmId     String?
+  id         String               @id @default(cuid())
+  name       String?
+  typeField  EnumSensorTypeField?
+  updatedAt  DateTime             @updatedAt
+}
+
+model Farm {
+  createdAt DateTime @default(now())
+  device    Device?  @relation(fields: [deviceId], references: [id])
+  deviceId  String?
+  id        String   @id @default(cuid())
+  location  String?
+  name      String?
+  sensors   Sensor[]
+  size      Float?
+  updatedAt DateTime @updatedAt
+}
+
+model DataPoint {
+  createdAt DateTime  @default(now())
+  id        String    @id @default(cuid())
+  sensor    Sensor?   @relation(fields: [sensorId], references: [id])
+  sensorId  String?
+  timestamp DateTime?
+  updatedAt DateTime  @updatedAt
+  value     Float?
+}
+
+enum EnumSensorTypeField {
+  Option1
+}
